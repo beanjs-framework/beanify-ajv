@@ -1,0 +1,24 @@
+{
+  "name": "beanify-ajv",
+  "version": "1.0.0",
+  "description": "beanify-ajv beanify",
+  "main": "index.js",
+  "scripts": {
+    "test": "tap test/*.test.js --100 --cov --coverage-report=text",
+    "unit": "tap test/*.test.js --100 --cov --coverage-report=lcov"
+  },
+  "author": "beanjs",
+  "license": "MIT",
+  "dependencies": {
+    "ajv": "^6.10.2",
+    "beanify-plugin": "^1.0.3"
+  },
+  "devDependencies": {
+    "beanify": "^1.0.7",
+    "tap": "^14.9.2"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/beanjs-framework/beanify-ajv.git"
+  }
+}
