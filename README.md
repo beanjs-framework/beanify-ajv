@@ -1,5 +1,7 @@
 # beanify-ajv
 
+[![Greenkeeper badge](https://badges.greenkeeper.io/beanjs-framework/beanify-ajv.svg)](https://greenkeeper.io/)
+
 ## install
 
 ```
