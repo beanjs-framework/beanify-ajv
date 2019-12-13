@@ -1,5 +1,7 @@
 # beanify-ajv
 
+[![JavaScript Style Guide](https://cdn.rawgit.com/standard/standard/master/badge.svg)](https://github.com/standard/standard)
+
 ## install
 
 ```
@@ -8,7 +10,7 @@ npm i beanify-ajv
 
 ## usage 
 
-```
+```javascript
 const Beanify=require("beanify")
 const beanifyPlugin=require("beanify-plugin")
 
