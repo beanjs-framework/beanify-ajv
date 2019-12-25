@@ -36,6 +36,7 @@ module.exports = beanifyPlugin((beanify, opts, done) => {
       })
       err.validation = $validation.body.errors
 
+      context.error(err)
       throw err
     }
 
@@ -51,6 +52,7 @@ module.exports = beanifyPlugin((beanify, opts, done) => {
       })
       err.validation = $validation.response.errors
 
+      context.error(err)
       throw err
     }
 

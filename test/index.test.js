@@ -80,7 +80,7 @@ tap.test('beanify-ajv test body', (t) => {
 })
 
 tap.test('beanify-ajv test body valid error', (t) => {
-  t.plan(2)
+  t.plan(3)
 
   const b = new Beanify(beanifyOpts)
 
@@ -103,7 +103,7 @@ tap.test('beanify-ajv test body valid error', (t) => {
 
       beanify.addHook('onError', ({ err }, next) => {
         t.equal(err.message, 'data.a should be number', 'check error message')
-        b.close()
+        // b.close()
         next()
       })
 
@@ -116,7 +116,8 @@ tap.test('beanify-ajv test body valid error', (t) => {
           a: '20'
         }
       }, (err, res) => {
-        throw err
+        t.equal(err.message, 'data.a should be number', 'check error message')
+        b.close()
       })
     })
 })
@@ -157,7 +158,7 @@ tap.test('beanify-ajv test response', (t) => {
 })
 
 tap.test('beanify-ajv test response valid error', (t) => {
-  t.plan(2)
+  t.plan(3)
 
   const b = new Beanify(beanifyOpts)
 
@@ -176,7 +177,7 @@ tap.test('beanify-ajv test response valid error', (t) => {
 
       beanify.addHook('onError', ({ err }, next) => {
         t.equal(err.message, 'data should be number', 'check error message')
-        b.close()
+
         next()
       })
 
@@ -190,7 +191,9 @@ tap.test('beanify-ajv test response valid error', (t) => {
           b: 10
         }
       }, (err, res) => {
-        throw err
+        t.equal(err.message, 'data should be number', 'check error message')
+        b.close()
+        // throw err
       })
     })
 })
