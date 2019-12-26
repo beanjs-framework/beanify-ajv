@@ -3,8 +3,10 @@ const beanifyPlugin = require('beanify-plugin')
 
 const b = new Beanify({
   nats: {
-    url: 'nats://localhost:4244'
-  }
+    url: 'nats://localhost:4222',
+    user: 'testuser',
+    pass: 'testpass'
+  },
 })
 
 b
@@ -13,14 +15,19 @@ b
     beanify.route({
       url: 'math.add',
       schema: {
-        response: [{
+        response: {
           type: 'number'
-        }, {
-          type: 'number'
-        }]
+        },
+        body: {
+          type: 'object',
+          properties: {
+            a: { type: 'number' },
+            b: { type: 'string' }
+          }
+        }
       }
     }, ({ body }, res) => {
-      res(null, body.a + body.b, 123)
+      res(null, body.a + body.b , 123)
     })
 
     beanify.addHook('onError', ({ err }, next) => {
@@ -40,9 +47,9 @@ b
         a: 20,
         b: 10
       }
-    }, (err, res,res1) => {
+    }, (err, res, res1) => {
       console.log({
-        err, res,res1
+        err, res, res1
       })
       // t.equal(err.message, 'data should be number', 'check error message')
       b.close()
