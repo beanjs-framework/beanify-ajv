@@ -15,7 +15,7 @@ module.exports = beanifyPlugin((beanify, opts, done) => {
       route.$ajv = {}
 
       if (schema.body) {
-        route.$ajv.bodyCheck = ajv.compile(bodySchema)
+        route.$ajv.bodyCheck = ajv.compile(schema.body)
       }
 
       if (schema.response) {
@@ -62,29 +62,31 @@ module.exports = beanifyPlugin((beanify, opts, done) => {
       }))
     }
 
-    if ($ajv.resCheckMap && Array.isArray(res) && Object.keys($ajv.resCheckMap).length >= res.length) {
-      res.forEach((val, idx) => {
-        if (!isError && val !== undefined && val !== null) {
-          const resCheck = $ajv.resCheckMap[idx]
-          if (resCheck(val) === false) {
-            isError = true
-            err = new Error(JSON.stringify({
-              err: ajv.errorsText(resCheck.errors),
-              resPos: idx
-            }))
+    if ($ajv.resCheckMap && Array.isArray(res)) {
+      if (Object.keys($ajv.resCheckMap).length >= res.length) {
+        res.forEach((val, idx) => {
+          if (!isError && val !== undefined && val !== null) {
+            const resCheck = $ajv.resCheckMap[idx]
+            if (resCheck(val) === false) {
+              isError = true
+              err = new Error(JSON.stringify({
+                err: ajv.errorsText(resCheck.errors),
+                resPos: idx
+              }))
+            }
           }
-        }
-      })
-    } else {
-      isError = true
-      err = new Error('return values length too large')
+        })
+      } else {
+        isError = true
+        err = new Error('return values length too large')
+      }
     }
 
     if (isError) {
       context.error(err)
       throw err
     }
-    
+
     next()
   })
 
