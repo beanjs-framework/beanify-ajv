@@ -9,18 +9,24 @@ module.exports = beanifyPlugin((beanify, opts, done) => {
   beanify.addHook('onRoute', ({ route, log }, next) => {
     const { schema } = route.$options
 
+    route.$ajv = {}
+
     if (schema) {
-      const bodySchema = schema.body
-      const responseSchema = schema.response
-      route.$validation = {
+      route.$ajv = {}
+
+      if (schema.body) {
+        route.$ajv.bodyCheck = ajv.compile(bodySchema)
       }
 
-      if (bodySchema) {
-        route.$validation.body = ajv.compile(bodySchema)
-      }
-
-      if (responseSchema) {
-        route.$validation.response = ajv.compile(responseSchema)
+      if (schema.response) {
+        if (Array.isArray(schema.response)) {
+          route.$ajv.resCheckMap = {}
+          schema.response.forEach((item, idx) => {
+            route.$ajv.resCheckMap[idx] = ajv.compile(item)
+          });
+        } else {
+          route.$ajv.resCheck = ajv.compile(schema.response)
+        }
       }
     }
 
@@ -28,13 +34,13 @@ module.exports = beanifyPlugin((beanify, opts, done) => {
   })
 
   beanify.addHook('onHandler', ({ context, req, log }, next) => {
-    const { $validation } = context
+    const { $ajv } = context
 
-    if ($validation && $validation.body && typeof $validation.body === 'function' && $validation.body(req.body) === false) {
-      const err = new Error(ajv.errorsText($validation.body.errors), {
+    if ($ajv.bodyCheck && typeof $ajv.bodyCheck === 'function' && $ajv.bodyCheck(req.body) === false) {
+      const err = new Error(JSON.stringify({
+        err: ajv.errorsText($ajv.body.errors),
         body: req.body
-      })
-      err.validation = $validation.body.errors
+      }))
 
       context.error(err)
       throw err
@@ -44,18 +50,41 @@ module.exports = beanifyPlugin((beanify, opts, done) => {
   })
 
   beanify.addHook('onAfterHandler', ({ context, res, log }, next) => {
-    const { $validation } = context
+    const { $ajv } = context
 
-    if ($validation && $validation.response && typeof $validation.response === 'function' && $validation.response(res) === false) {
-      const err = new Error(ajv.errorsText($validation.response.errors), {
-        response: res
+    let isError = false;
+    let err;
+    if ($ajv.resCheck && typeof $ajv.resCheck === 'function' && res !== undefined && res !== null && $ajv.resCheck(res) === false) {
+      isError = true
+      err = new Error(JSON.stringify({
+        err: ajv.errorsText($ajv.resCheck.errors),
+        res: res
+      }))
+    }
+
+    if ($ajv.resCheckMap && Array.isArray(res) && Object.keys($ajv.resCheckMap).length >= res.length) {
+      res.forEach((val, idx) => {
+        if (!isError && val !== undefined && val !== null) {
+          const resCheck = $ajv.resCheckMap[idx]
+          if (resCheck(val) === false) {
+            isError = true
+            err = new Error(JSON.stringify({
+              err: ajv.errorsText(resCheck.errors),
+              resPos: idx
+            }))
+          }
+        }
       })
-      err.validation = $validation.response.errors
+    } else {
+      isError = true
+      err = new Error('return values length too large')
+    }
 
+    if (isError) {
       context.error(err)
       throw err
     }
-
+    
     next()
   })
 
