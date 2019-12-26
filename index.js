@@ -37,10 +37,7 @@ module.exports = beanifyPlugin((beanify, opts, done) => {
     const { $ajv } = context
 
     if ($ajv.bodyCheck && typeof $ajv.bodyCheck === 'function' && $ajv.bodyCheck(req.body) === false) {
-      const err = new Error(JSON.stringify({
-        err: ajv.errorsText($ajv.body.errors),
-        body: req.body
-      }))
+      const err = new Error(ajv.errorsText($ajv.body.errors))
 
       context.error(err)
       throw err
@@ -54,15 +51,23 @@ module.exports = beanifyPlugin((beanify, opts, done) => {
 
     let isError = false;
     let err;
-    if ($ajv.resCheck && typeof $ajv.resCheck === 'function' && res !== undefined && res !== null && $ajv.resCheck(res) === false) {
-      isError = true
-      err = new Error(JSON.stringify({
-        err: ajv.errorsText($ajv.resCheck.errors),
-        res: res
-      }))
+    if ($ajv.resCheck && typeof $ajv.resCheck === 'function') {
+
+      if (res !== undefined && res !== null) {
+        let val = res
+        if (Array.isArray(val) && val.length == 1) {
+          val = res[0]
+        }
+
+        if ($ajv.resCheck(val) === false) {
+          isError = true
+          err = new Error(ajv.errorsText($ajv.resCheck.errors))
+        }
+
+      }
     }
 
-    if ($ajv.resCheckMap && Array.isArray(res)) {
+    if ($ajv.resCheckMap && Array.isArray(res) && res.length > 1) {
       if (Object.keys($ajv.resCheckMap).length >= res.length) {
         res.forEach((val, idx) => {
           if (!isError && val !== undefined && val !== null) {
