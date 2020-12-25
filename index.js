@@ -1,101 +1,40 @@
-const beanifyPlugin = require('beanify-plugin')
-const AJV = require('ajv')
+const AJV = require('ajv').default
+const kBeanifyAjv = Symbol.for('beanify.ajv')
 
-module.exports = beanifyPlugin((beanify, opts, done) => {
-  opts.ajv = opts.ajv || {}
-  opts.ajv.useDefaults = true
-  const ajv = new AJV(opts.ajv)
+function buildAjvErrorsMsg (name, errs) {
+  return errs
+    .map(e => {
+      return `position: [${name}] schema path: [${e.schemaPath}] message: ${e.message}`
+    })
+    .join('\n')
+}
 
-  beanify.addHook('onRoute', ({ route, log }, next) => {
-    const { schema } = route.$options
+function verification (name, schema, val) {
+  const ajv = this.$beanify[kBeanifyAjv]
+  const verification = ajv.compile(schema)
+  if (!verification(val)) {
+    throw new Error(buildAjvErrorsMsg(name, verification.errors))
+  }
+}
 
-    route.$ajv = {}
+module.exports = async function (beanify, opts) {
+  beanify[kBeanifyAjv] = new AJV(opts.ajv)
+  beanify.addHook('onBeforeHandler', async function (req, rep) {
+    const schema = this.schema || {}
 
-    if (schema) {
-      route.$ajv = {}
-
-      if (schema.body) {
-        route.$ajv.bodyCheck = ajv.compile(schema.body)
-      }
-
-      if (schema.response) {
-        // if (Array.isArray(schema.response)) {
-        //   route.$ajv.resCheckMap = {}
-        //   schema.response.forEach((item, idx) => {
-        //     route.$ajv.resCheckMap[idx] = ajv.compile(item)
-        //   });
-        // } else {
-        route.$ajv.resCheck = ajv.compile(schema.response)
-        // }
-      }
+    if (schema.body) {
+      verification.call(this, 'body', schema.body, req.body)
     }
 
-    next()
+    if (schema.attribute) {
+      verification.call(this, 'attribute', schema.attribute, this.$attribute)
+    }
   })
+  beanify.addHook('onAfterHandler', function (req, rep) {
+    const schema = this.schema || {}
 
-  beanify.addHook('onHandler', ({ context, req, log }, next) => {
-    const { $ajv } = context
-
-    if ($ajv.bodyCheck && typeof $ajv.bodyCheck === 'function' && $ajv.bodyCheck(req.body) === false) {
-      const err = new Error(ajv.errorsText($ajv.bodyCheck.errors))
-
-      context.error(err)
-      throw err
+    if (schema.response && !rep.$sent) {
+      verification.call(this, 'response', schema.response, rep.$data)
     }
-
-    next()
   })
-
-  beanify.addHook('onAfterHandler', ({ context, res, log }, next) => {
-    const { $ajv } = context
-
-    let isError = false;
-    let err;
-    if ($ajv.resCheck && typeof $ajv.resCheck === 'function') {
-
-      if (res !== undefined && res !== null) {
-        // let val = res
-        // if (Array.isArray(val) && val.length == 1) {
-        //   val = res[0]
-        // }
-
-        if ($ajv.resCheck(res) === false) {
-          isError = true
-          err = new Error(ajv.errorsText($ajv.resCheck.errors))
-        }
-
-      }
-    }
-
-    // if ($ajv.resCheckMap && Array.isArray(res) && res.length > 1) {
-    //   if (Object.keys($ajv.resCheckMap).length >= res.length) {
-    //     res.forEach((val, idx) => {
-    //       if (!isError && val !== undefined && val !== null) {
-    //         const resCheck = $ajv.resCheckMap[idx]
-    //         if (resCheck(val) === false) {
-    //           isError = true
-    //           err = new Error(JSON.stringify({
-    //             err: ajv.errorsText(resCheck.errors),
-    //             resPos: idx
-    //           }))
-    //         }
-    //       }
-    //     })
-    //   } else {
-    //     isError = true
-    //     err = new Error('return values length too large')
-    //   }
-    // }
-
-    if (isError) {
-      context.error(err)
-      throw err
-    }
-
-    next()
-  })
-
-  done()
-}, {
-  name: 'beanify-ajv'
-})
+}

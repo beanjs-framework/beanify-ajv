@@ -1,24 +1,5 @@
-# beanify-ajv
-
-Used to verify `req.body`, `route.$attribute` parameter structure and `rep.$data` return results
-
-## Install
-
-```bash
-npm i beanify-ajv --save
-```
-
-with yarn
-
-```bash
-yarn add beanify-ajv
-```
-
-## Usage
-
-```javascript
 const Beanify = require('beanify')
-const Ajv = require('beanify-ajv')
+const Ajv = require('./index')
 const beanify = Beanify({})
 
 beanify
@@ -67,15 +48,3 @@ beanify
       }
     })
   })
-```
-
-## Options
-
-- `ajv`: used to configure `AJV` instance.check [here](https://github.com/ajv-validator/ajv/blob/master/docs/api.md#options)
-
-## Route Decorators
-
-- `schema`:
-  - `body`: to check `req.body` field.check [here](https://json-schema.org/)
-  - `attribute`: to check `route.$attribute` field.check [here](https://json-schema.org/)
-  - `response`: to check `rep.$data` field.check [here](https://json-schema.org/)
