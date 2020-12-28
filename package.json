@@ -1,6 +1,6 @@
 {
   "name": "beanify-ajv",
-  "version": "3.0.1",
+  "version": "3.0.2",
   "description": "beanify-ajv beanify",
   "main": "index.js",
   "scripts": {
@@ -11,6 +11,7 @@
   },
   "author": "beanjs",
   "license": "MIT",
+  "typings": "index.d.ts",
   "dependencies": {
     "ajv": "^7.0.2"
   },
