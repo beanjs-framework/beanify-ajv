@@ -5,6 +5,15 @@ export class AjvOptions extends PluginOptions {
   ajv?: Options
 }
 
+declare type Known =
+  | Record<string, any>
+  | [Known, ...Known[]]
+  | Known[]
+  | number
+  | string
+  | boolean
+  | null
+
 export interface AjvRouteOptions {
   attribute?: JSONSchemaType<Record<string, any>, true>
 
