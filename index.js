@@ -1,4 +1,4 @@
-const AJV = require('ajv').default
+const { default: AJV } = require('ajv')
 const kBeanifyAjv = Symbol.for('beanify.ajv')
 const kAjvBody = Symbol.for('ajv.body')
 const kAjvAttribute = Symbol.for('ajv.attribute')

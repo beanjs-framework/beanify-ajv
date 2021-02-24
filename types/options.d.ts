@@ -1,14 +1,34 @@
 import { Beanify, PluginDoneCallback, PluginOptions } from 'beanify'
-import { Options } from 'ajv'
+import { Options, JSONSchemaType } from 'ajv'
 
 export class AjvOptions extends PluginOptions {
   ajv?: Options
 }
 
 export interface AjvRouteOptions {
-  body?: Record<string, unknown>
-  attribute?: Record<string, unknown>
-  response?: Record<string, unknown>
+  attribute?: JSONSchemaType<Record<string, any>, true>
+
+  body?: JSONSchemaType<
+    | Record<string, any>
+    | [Known, ...Known[]]
+    | Known[]
+    | number
+    | string
+    | boolean
+    | null,
+    true
+  >
+
+  response?: JSONSchemaType<
+    | Record<string, any>
+    | [Known, ...Known[]]
+    | Known[]
+    | number
+    | string
+    | boolean
+    | null,
+    true
+  >
 }
 
 export type BeanifyAjv = (

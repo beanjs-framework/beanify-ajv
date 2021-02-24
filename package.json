@@ -1,6 +1,6 @@
 {
   "name": "beanify-ajv",
-  "version": "3.0.3",
+  "version": "3.0.4",
   "description": "beanify-ajv beanify",
   "main": "index.js",
   "scripts": {
@@ -13,7 +13,7 @@
   "license": "MIT",
   "typings": "index.d.ts",
   "dependencies": {
-    "ajv": "^7.0.2"
+    "ajv": "^7.1.1"
   },
   "devDependencies": {
     "@typescript-eslint/eslint-plugin": "^4.9.1",
