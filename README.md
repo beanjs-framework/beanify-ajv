@@ -28,7 +28,7 @@ beanify
     }
   })
   .route({
-    url: 'math.add',
+    url: 'math.:action',
     schema: {
       body: {
         type: 'object',
@@ -47,11 +47,20 @@ beanify
       },
       response: {
         type: 'string'
+      },
+      params: {
+        type: 'object',
+        properties: {
+          action: {
+            type: 'string'
+          }
+        }
       }
     },
     handler (req, rep) {
       // const e = new Error('message test')
       // rep.error(e)
+      console.log(req.params)
       rep.send(req.body)
     }
   })
@@ -76,6 +85,7 @@ beanify
 ## Route Decorators
 
 - `schema`:
+  - `params`: to check `req.params` field.check [here](https://json-schema.org/)
   - `body`: to check `req.body` field.check [here](https://json-schema.org/)
   - `attribute`: to check `route.$attribute` field.check [here](https://json-schema.org/)
   - `response`: to check `rep.$data` field.check [here](https://json-schema.org/)

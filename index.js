@@ -1,8 +1,10 @@
 const { default: AJV } = require('ajv')
-const kBeanifyAjv = Symbol.for('beanify.ajv')
-const kAjvBody = Symbol.for('ajv.body')
-const kAjvAttribute = Symbol.for('ajv.attribute')
-const kAjvResponse = Symbol.for('ajv.response')
+const kBeanifyAjv = Symbol('beanify.ajv')
+
+const kAjvParams = Symbol('ajv.params')
+const kAjvBody = Symbol('ajv.body')
+const kAjvAttribute = Symbol('ajv.attribute')
+const kAjvResponse = Symbol('ajv.response')
 
 function buildAjvErrorsMsg (name, errs) {
   return errs
@@ -24,6 +26,9 @@ module.exports = async function (beanify, opts) {
   beanify.addHook('onRoute', function (route) {
     const ajv = route.$beanify[kBeanifyAjv]
     const schema = route.schema || {}
+    if (schema.params) {
+      route[kAjvParams] = ajv.compile(schema.params)
+    }
     if (schema.body) {
       route[kAjvBody] = ajv.compile(schema.body)
     }
@@ -36,6 +41,10 @@ module.exports = async function (beanify, opts) {
   })
 
   beanify.addHook('onBeforeHandler', async function (req, rep) {
+    if (this[kAjvParams]) {
+      verification('params', this[kAjvParams], req.params)
+    }
+
     if (this[kAjvBody]) {
       verification('body', this[kAjvBody], req.body)
     }

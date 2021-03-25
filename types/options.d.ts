@@ -16,6 +16,7 @@ declare type Known =
 
 export interface AjvRouteOptions {
   attribute?: JSONSchemaType<Record<string, any>, true>
+  params?: JSONSchemaType<Record<string, any>, true>
 
   body?: JSONSchemaType<
     | Record<string, any>

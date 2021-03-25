@@ -9,7 +9,7 @@ beanify
     }
   })
   .route({
-    url: 'math.add',
+    url: 'math.:action',
     schema: {
       body: {
         type: 'object',
@@ -28,12 +28,21 @@ beanify
       },
       response: {
         type: 'string'
+      },
+      params: {
+        type: 'object',
+        properties: {
+          action: {
+            type: 'string'
+          }
+        }
       }
     },
     handler (req, rep) {
       // const e = new Error('message test')
       // rep.error(e)
-      rep.send(req.body)
+      console.log(req.params)
+      rep.send('req.body')
     }
   })
   .ready(async e => {
