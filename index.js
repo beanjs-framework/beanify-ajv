@@ -54,7 +54,7 @@ module.exports = async function (beanify, opts) {
     }
   })
   beanify.addHook('onAfterHandler', function (req, rep) {
-    if (this[kAjvResponse]) {
+    if (this[kAjvResponse] && rep.$data) {
       verification('response', this[kAjvResponse], rep.$data)
     }
   })
